@@ -2,6 +2,8 @@
 pragma solidity 0.8.30;
 import {IERC20, SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
+// import {console} from "forge-std/console.sol";
+import {console} from "forge-std/Script.sol"; // Use console2 for better logging;
 
 contract MerkleAirdrop {
     using SafeERC20 for IERC20;
@@ -21,7 +23,7 @@ contract MerkleAirdrop {
         i_airdropToken = airdropToken;
     }
 
-    function calim(
+    function claim(
         address account,
         uint256 amount,
         bytes32[] calldata merkleProof
@@ -30,9 +32,17 @@ contract MerkleAirdrop {
             revert MerkleAirdrop__AlreadyClaimed();
         }
         bytes32 leaf = keccak256(
-            bytes.concat(keccak256(abi.encodePacked(account, amount)))
+            bytes.concat(
+                keccak256(
+                    abi.encodePacked(
+                        bytes32(uint256(uint160(account))),
+                        bytes32(amount)
+                    )
+                )
+            )
         );
-
+        console.log("leaf:");
+        console.logBytes32(leaf); // ✅ Correct for bytes32
         if (!MerkleProof.verify(merkleProof, i_merkleRoot, leaf)) {
             revert MerkleAirdrop__InvalidProof();
         }
