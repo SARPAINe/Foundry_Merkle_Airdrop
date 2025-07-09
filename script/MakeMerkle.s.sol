@@ -96,13 +96,22 @@ contract MakeMerkle is Script, ScriptHelper {
                     // you can't immediately cast straight to 32 bytes as an address is 20 bytes so first cast to uint160 (20 bytes) cast up to uint256 which is 32 bytes and finally to bytes32
                     data[j] = bytes32(uint256(uint160(value)));
                     input[j] = vm.toString(value);
+                    // console.logBytes32(data[j]);
+                    // console.log("Input: %s", input[j]);
                 } else if (compareStrings(types[j], "uint")) {
                     uint256 value = vm.parseUint(
                         elements.readString(getValuesByIndex(i, j))
                     );
                     data[j] = bytes32(value);
                     input[j] = vm.toString(value);
+                    // console.logBytes32(data[j]);
+                    // console.log("Input: %s", input[j]);
                 }
+            }
+            for (uint256 j = 0; j < types.length; ++j) {
+                // log the data for debugging
+                console.log("Input %s: %s", j, input[j]);
+                console.logBytes32(data[j]);
             }
             // Create the hash for the merkle tree leaf node
             // abi encode the data array (each element is a bytes32 representation for the address and the amount)
@@ -115,6 +124,16 @@ contract MakeMerkle is Script, ScriptHelper {
             leafs[i] = keccak256(
                 bytes.concat(keccak256(ltrim64(abi.encode(data))))
             );
+            bytes memory abiEncoded = abi.encode(data);
+            bytes32 afterTrimming = keccak256(ltrim64(abiEncoded)); // remove the first 64 bytes from the encoded bytes
+            console.log("Leaf %s", i);
+            console.logBytes32(leafs[i]);
+            console.logBytes(abiEncoded);
+            console.logBytes32(afterTrimming);
+            bytes memory afterConcat = bytes.concat(afterTrimming); // concat the bytes32 to bytes
+            console.logBytes(afterConcat);
+            bytes32 afterHash = keccak256(afterConcat); // hash the bytes again
+            console.logBytes32(afterHash);
             // Converts a string array into a JSON array string.
             // store the corresponding values/inputs for each leaf node
             inputs[i] = stringArrayToString(input);
