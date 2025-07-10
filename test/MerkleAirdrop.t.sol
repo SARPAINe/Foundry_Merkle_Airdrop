@@ -6,8 +6,10 @@ import {Test, console} from "forge-std/Test.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Sarpaine} from "../src/Sarpaine.sol";
+import {ZkSyncChainChecker} from "@foundry-devops/ZkSyncChainChecker.sol"; // Import StringUtils for string manipulation;
+import {DeployMerkleAirdrop} from "script/DeployMerkleAirdrop.s.sol"; // Import the deployment script if needed
 
-contract MerkleAirdropTest is Test {
+contract MerkleAirdropTest is Test, ZkSyncChainChecker {
     MerkleAirdrop public merkleAirdrop;
     Sarpaine public sarpaine;
 
@@ -22,12 +24,18 @@ contract MerkleAirdropTest is Test {
     uint256 userPrivateKey;
 
     function setUp() external {
-        sarpaine = new Sarpaine();
-        merkleAirdrop = new MerkleAirdrop(MERKLE_ROOT, sarpaine);
-        sarpaine.mint(
-            address(merkleAirdrop),
-            100 * 1e18 // Mint 100 SP tokens to the airdrop contract
-        );
+        if (!isZkSyncChain()) {
+            // deploy with the script
+            DeployMerkleAirdrop deployer = new DeployMerkleAirdrop();
+            (merkleAirdrop, sarpaine) = deployer.deployMerkleAirdrop();
+        } else {
+            sarpaine = new Sarpaine();
+            merkleAirdrop = new MerkleAirdrop(MERKLE_ROOT, sarpaine);
+            sarpaine.mint(
+                address(merkleAirdrop),
+                100 * 1e18 // Mint 100 SP tokens to the airdrop contract
+            );
+        }
         (user, userPrivateKey) = makeAddrAndKey("user");
     }
 
