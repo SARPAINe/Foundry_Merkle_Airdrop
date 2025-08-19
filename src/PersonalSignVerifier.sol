@@ -2,6 +2,28 @@
 pragma solidity 0.8.30;
 import {console} from "forge-std/console.sol";
 
+/**
+ * @title PersonalSignVerifier
+ * @author Shaharin Ahmed
+ * @notice Verifies Ethereum personal signatures (EIP-191) and explains the standards involved
+ * @dev
+ * ## Guidelines for Use
+ * - Use this contract to verify signatures produced by `personal_sign` (EIP-191), not EIP-712 typed data.
+ * - Always provide the original plaintext message and the full 65-byte signature (r, s, v).
+ * - The contract reconstructs the signed message hash using the EIP-191 format: `"\x19Ethereum Signed Message:\n{length}{message}"`.
+ * - Signature splitting and recovery is handled internally; ensure the signature is in the correct format.
+ * - The recovered address is compared to the expected signer for verification.
+ *
+ * ## Standards Explained
+ * - **EIP-191**: Defines the personal message signing format, making signed data distinct from transactions and preventing replay attacks.
+ * - **EIP-712**: (Not used here) Introduces structured data signing and domain separation for advanced use cases.
+ *
+ * ## Security Notes
+ * - Only use for verifying off-chain messages signed with `personal_sign`.
+ * - Do not use for transaction or typed data signatures.
+ * - Always validate the message and expected signer to prevent spoofing.
+ */
+
 contract PersonalSignVerifier {
     /**
      * @notice Returns the Ethereum signed message hash for a given message following EIP-191 standard

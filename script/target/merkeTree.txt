@@ -1,0 +1,10 @@
+                    ROOT
+               0xaa5d581231...
+                   /    \
+                  /      \
+            0xe5ebd1e1... 0x81f0e530...
+             /    \        /    \
+            /      \      /      \
+      Leaf1     Leaf2   Leaf3   Leaf4
+   (Address1) (Address2) (Address3) (Address4)
+   0xd1445c9  0x0fd7c98  0x0c7ef88  0x4fd31fe
