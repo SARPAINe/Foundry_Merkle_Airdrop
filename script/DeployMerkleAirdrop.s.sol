@@ -10,7 +10,7 @@ import {ZkSyncChainChecker} from "@foundry-devops/ZkSyncChainChecker.sol"; // Im
 
 contract DeployMerkleAirdrop is Script {
     bytes32 private s_merkleRoot =
-        0xaa5d581231e596618465a56aa0f5870ba6e20785fe436d5bfb82b08662ccc7c4; // Replace with actual Merkle root
+        0xd43bf0bb847e8e31cff20444eabbfc9db49e366af7f55a3ed265c123f9970498; // Replace with actual Merkle root
     uint256 private s_amountToTransfer = 4 * 25e18;
 
     function run() external returns (MerkleAirdrop, Sarpaine) {
