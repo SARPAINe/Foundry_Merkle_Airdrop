@@ -1,5 +1,8 @@
 {
-  "types": ["address", "uint"],
+  "types": [
+    "address",
+    "uint"
+  ],
   "count": 4,
   "values": {
     "0": {
