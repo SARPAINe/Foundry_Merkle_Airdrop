@@ -1,0 +1,30 @@
+forge create src/Sarpaine.sol:Sarpaine --rpc-url $ZKSYNC_SEPOLIA_RPC_URL --account account1 --legacy --zksync --broadcast
+
+export TOKEN_ADDRESS=0xF897a1640A9697825EB428A130d6da1F22C39161
+
+forge create src/MerkleAirdrop.sol:MerkleAirdrop --rpc-url $ZKSYNC_SEPOLIA_RPC_URL --account account1 --legacy --zksync --broadcast --constructor-args 0xd43bf0bb847e8e31cff20444eabbfc9db49e366af7f55a3ed265c123f9970498 0xF897a1640A9697825EB428A130d6da1F22C39161
+
+export AIRDROP_ADDRESS=0x10B2ce0E0FD0cf9cc0734e40CD5c321BcDcb1dAA
+
+cast call $AIRDROP_ADDRESS "getMessage(address,uint256)" 0xfEc0c677955472E5EcDD3Fb6F3DeeD33D7FB1FB4 25000000000000000000 --rpc-url $ZKSYNC_SEPOLIA_RPC_URL
+
+export MESSAGE_HASH=0xd7512aa0c123ec64651388e39ccf4b2b2e27f9452e4a10582ba428c028f5e652
+cast wallet sign --no-hash $MESSAGE_HASH --account account1
+
+touch signature.txt
+
+forge script script/SplitSignature.s.sol:SplitSignature
+
+export V_VAL=27
+export R_VAL=0xf00e58b3eb7e661cab99ca3075bb70f92acef8f5678a4475e8a462e7ea4ccf43
+export S_VAL=0x2eb75efe08a084bcbececd93aca73bb1e3b8e2b44fe35975afa6e6de47d6a7cc
+
+cast send ${TOKEN_ADDRESS} "mint(address,uint256)"     0xfEc0c677955472E5EcDD3Fb6F3DeeD33D7FB1FB4 100000000000000000000 --account account1 --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} --legacy --zksync
+
+cast send $TOKEN_ADDRESS "transfer(address,uint256)" $AIRDROP_ADDRESS 100000000000000000000 --account account1 --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL}--legacy --zksync
+
+cast send ${AIRDROP_ADDRESS} "claim(address,uint256,bytes32[],uint8,bytes32,bytes32)" 0xfEc0c677955472E5EcDD3Fb6F3DeeD33D7FB1FB4 25000000000000000000 "[0x0fd7c981d39bece61f7499702bf59b3114a90e66b51ba2c53abdf7b62986c00a,0xc577e56dae28b8c28a4814d50e83f82d123cb774332b50f5a26f1c62dd25cb59]" ${V_VAL} ${R_VAL} ${S_VAL} --account account2 --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL} --legacy --zksync
+
+cast call ${TOKEN_ADDRESS} "balanceOf(address)" 0xfEc0c677955472E5EcDD3Fb6F3DeeD33D7FB1FB4 --rpc-url ${ZKSYNC_SEPOLIA_RPC_URL}
+
+cast --to-dec 0x0000000000000000000000000000000000000000000000015af1d78b58c40000
