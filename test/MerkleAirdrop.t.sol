@@ -23,6 +23,8 @@ contract MerkleAirdropTest is Test, ZkSyncChainChecker {
     address user;
     uint256 userPrivateKey;
 
+    address public gasPayer; // new address for the gas payer
+
     function setUp() external {
         if (!isZkSyncChain()) {
             // deploy with the script
@@ -37,16 +39,22 @@ contract MerkleAirdropTest is Test, ZkSyncChainChecker {
             );
         }
         (user, userPrivateKey) = makeAddrAndKey("user");
+        gasPayer = makeAddr("gasPayer"); // Initialize the gas payer address
     }
 
     function testUsersCanClaim() public {
         uint256 startingBalance = sarpaine.balanceOf(user);
 
+        //1. get the message digest that user needs to sign
+        bytes32 digest = merkleAirdrop.getMessage(user, 25 * 1e18);
+
         uint256 amount = 25 * 1e18;
-        console.log(user);
-        vm.prank(user);
-        // bytes32[] memory merkleProof = new bytes32[](2);
-        merkleAirdrop.claim(user, amount, PROOF);
+        //2. User signs the digest off-chain to produce the signature (v, r, s)
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(userPrivateKey, digest);
+
+        //3. the gas payer calls the claim function on behalf of the user
+        vm.prank(gasPayer);
+        merkleAirdrop.claim(user, amount, PROOF, v, r, s);
         uint256 endingBalance = sarpaine.balanceOf(user);
         assertEq(endingBalance, startingBalance + amount);
     }
